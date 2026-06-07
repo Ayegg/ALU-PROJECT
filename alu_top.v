@@ -16,7 +16,7 @@ module alu_top (
     add_sub_8bit adder (.a(A), .b(B), .sub_mode(1'b0), .result(res_add), .cout(cout_add), .overflow(ovf_add));
     add_sub_8bit subtractor (.a(A), .b(B), .sub_mode(1'b1), .result(res_sub), .cout(cout_sub), .overflow(ovf_sub));
 
-    // 2. Operatii secven?iale (Înmultire si Impartire)
+    // 2. Operatii secventiale (Inmultire si Impartire)
     multiplier_seq mult_unit (.clk(clk), .rst(rst), .start(start), .A(A), .B(B), .result(res_mul), .done(mul_done));
     divider_seq div_unit (.clk(clk), .rst(rst), .start(start), .A(A), .B(B), .result(res_div), .done(div_done));
 
@@ -25,7 +25,7 @@ module alu_top (
     shifter_8bit shift_unit (.a(A), .shift_left(res_shl), .shift_right(res_shr));
 
     // =================================================================
-    // MUX STRUCTURAL PENTRU REZULTAT (Înlocuieste always / case)
+    // MUX STRUCTURAL PENTRU REZULTAT (Inlocuieste always / case)
     // =================================================================
     wire [7:0] mux_out_0_7;
     
