@@ -1,9 +1,6 @@
 `timescale 1ns / 1ps
 
-// =================================================================
-// MODUL: INMULTITOR SECVENTIAL (Algoritmul Shift-and-Add)
-// Functioneaza exact ca inmultirea pe care o facem pe hartie.
-// =================================================================
+// MODUL: INMULTITOR SECVENTIAL
 module multiplier_seq (
     input clk, rst, start,
     input [7:0] A, B,
@@ -11,7 +8,7 @@ module multiplier_seq (
     output reg done
 );
     // --- SEMNALE DE CONTROL ---
-    // Aceste fire sunt 'comenzile' date de FSM catre Datapath
+    // Aceste wires sunt 'comenzile' date de FSM catre Datapath
     wire load, shift, add;
     
     // Registrii care stocheaza datele pe parcursul inmultirii
@@ -24,11 +21,9 @@ module multiplier_seq (
     // Extragem mereu doar primul bit din B pentru a sti daca adunam sau nu
     wire b0_bit;
 
-    // -------------------------------------------------------------
-    // DATAPATH (CALEA DE DATE) - Aici se fac operatiile fizice
-    // -------------------------------------------------------------
+    // DATAPATH 
     
-    // 1. REGISTRUL A (Deinmultitul / Multiplicand)
+    // REGISTRUL A (Deinmultitul / Multiplicand)
     // Daca dam 'load', primeste valoarea A initiala.
     // Altfel, la fiecare comanda 'shift', se deplaseaza la STANGA cu o pozitie.
     // Deplasarea la stanga e ca si cum am adauga un zero la coada numarului pe hartie.
@@ -36,7 +31,7 @@ module multiplier_seq (
     mux_2to1_8bit mux_A (.d0({A_reg[6:0], 1'b0}), .d1(A), .sel(load), .y(next_A));
     reg_8bit reg_A (.clk(clk), .rst(rst), .en(load | shift), .d(next_A), .q(A_reg));
 
-    // 2. REGISTRUL B (Inmultitorul / Multiplicator)
+    // REGISTRUL B (Inmultitorul / Multiplicator)
     // Daca dam 'load', primeste valoarea B initiala.
     // La fiecare comanda 'shift', se deplaseaza la DREAPTA.
     // Facem asta ca sa putem verifica mereu bitul de pe pozitia 0 (b0_bit).
@@ -46,15 +41,14 @@ module multiplier_seq (
     assign b0_bit = B_reg[0]; // Semnalul care decide daca adunam in acest pas
 
     // 3. SUMATORUL FIZIC
-    // Folosim din nou modulul tau structural. El doar aduna in mod constant
-    // valoarea actuala din A cu valoarea stocata in Acumulatorul P.
+    // Aduna in mod constant valoarea actuala din A cu valoarea stocata in Acumulatorul P.
     add_sub_8bit adder_mult (
         .a(P_reg), .b(A_reg), 
         .sub_mode(1'b0), // 0 forteaza adunarea
         .result(add_out), .cout(add_cout), .overflow(add_ovf)
     );
 
-    // 4. ACUMULATORUL P (Produsul Partial)
+    // ACUMULATORUL P (Produsul Partial)
     // Daca dam 'load', se reseteaza la 0.
     // Daca dam 'add', memoreaza rezultatul scos de sumator. 
     // Nu se shifteaza, pentru ca am shiftat deja registrul A!
@@ -66,10 +60,7 @@ module multiplier_seq (
     assign result = P_reg;
 
 
-    // -------------------------------------------------------------
     // CONTROL UNIT (FSM - Automatul de Stari)
-    // Creierul care coordoneaza intregul proces secvential
-    // -------------------------------------------------------------
     reg [1:0] state, next_state;
     reg [2:0] count; // Numarator pe 3 biti, merge de la 0 la 7 (8 pasi)
     
@@ -89,7 +80,7 @@ module multiplier_seq (
         end
     end
 
-    // Logica combinationala care decide incotro mergem (Tranzitiile)
+    // Tranzitiile
     always @(*) begin
         next_state = state;
         done = 0; 
@@ -118,7 +109,7 @@ module multiplier_seq (
         endcase
     end
 
-    // DECODIFICARE COMENZI: Traducem starile FSM-ului in actiuni pentru Datapath
+    // Traducem starile FSM-ului in actiuni pentru Datapath
     // load: activ doar cand dam start in starea IDLE
     assign load  = (state == IDLE && start);
     // add: activ doar in faza de calcul si DOAR DACA bitul curent din B este 1
