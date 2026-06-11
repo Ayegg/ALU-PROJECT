@@ -10,14 +10,13 @@ module alu_top (
 );
 
     // FIRE DE LEGATURA (WIRES)
-    // Un 'wire' este doar un cablu fizic. Nu stocheaza nimic, 
-    // doar transporta semnalul de la o iesire la o intrare.
+    // wire- transporta semnalul de la o iesire la o intrare
     wire [7:0] res_add, res_sub, res_mul, res_div, res_and, res_or, res_xor, res_shl, res_shr;
     wire cout_add, ovf_add, cout_sub, ovf_sub, mul_done, div_done;
 
-    // 1. BLOCURILE ARITMETICE
-    // Toate blocurile hardware calculeaza in acelasi timp.
-    // Variabila 'sub_mode' ii spune modulului daca trebuie sa adune (0) sau sa scada (1).
+    //  BLOCURILE ARITMETICE
+    // Toate blocurile calculeaza in acelasi timp.
+    // Variabila sub_mode ii spune modulului daca trebuie sa adune (0) sau sa scada (1).
     add_sub_8bit adder (
         .a(A), .b(B), .sub_mode(1'b0), 
         .result(res_add), .cout(cout_add), .overflow(ovf_add)
@@ -27,7 +26,7 @@ module alu_top (
         .result(res_sub), .cout(cout_sub), .overflow(ovf_sub)
     );
 
-    // 2. BLOCURILE SECVENTIALE (Inmultire si Impartire)
+    //  BLOCURILE SECVENTIALE (Inmultire si Impartire)
     // Aceste operatii au nevoie de clock (clk) pentru ca dureaza mai multe cicluri de ceas.
     multiplier_seq mult_unit (
         .clk(clk), .rst(rst), .start(start), 
@@ -38,7 +37,7 @@ module alu_top (
         .A(A), .B(B), .result(res_div), .done(div_done)
     );
 
-    // 3. BLOCURILE LOGICE SI DE SHIFT (Deplasare)
+    // BLOCURILE LOGICE SI DE SHIFT (Deplasare)
     logic_ops_8bit logic_unit (
         .a(A), .b(B), 
         .out_and(res_and), .out_or(res_or), .out_xor(res_xor)
@@ -83,7 +82,7 @@ module alu_top (
     not (not_op1, opcode[1]);
     not (not_op0, opcode[0]);
 
-    // Folosim porti AND pentru a detecta fizic daca avem inmultire (0010) sau impartire (0011)
+    // Folosim porti AND pentru a detecta daca avem inmultire (0010) sau impartire (0011)
     and (is_mul, not_op3, not_op2, opcode[1], not_op0);
     and (is_div, not_op3, not_op2, opcode[1], opcode[0]);
     
@@ -108,7 +107,7 @@ module alu_top (
     // NOR scoate 1 logic DOAR DACA toti bitii care intra in ea sunt 0.
     nor (Z, result[0], result[1], result[2], result[3], result[4], result[5], result[6], result[7]);
 
-    // FLAG-UL V (Overflow - Depasire de capacitate): Valabil doar la adunare (0000) si scadere (0001).
+    // FLAG-UL V (Overflow): Valabil doar la adunare (0000) si scadere (0001).
     wire is_add, is_sub, is_arith, ovf_arith;
     
     // Detectam starea de adunare sau scadere
