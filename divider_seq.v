@@ -1,7 +1,7 @@
 `timescale 1ns / 1ps
 
 
-// 1. NUMARATOR PE 4 BITI (Aici numaram pasii impartirii)
+// NUMARATOR PE 4 BITI (Aici numaram pasii impartirii)
 
 module counter_4bit (
     input clk, rst, en, clr,
@@ -46,7 +46,7 @@ endmodule
 
 
 
-// 2. MODULUL PRINCIPAL: IMPARTITOR SECVENTIAL 
+// MODULUL PRINCIPAL: IMPARTITOR SECVENTIAL 
 // Implementeaza algoritmul Restoring Division
 module divider_seq (
     input clk, rst, start,
@@ -114,7 +114,7 @@ module divider_seq (
     // Daca suntem in faza de incarcare SAU calcul, dam 'enable' la registru
     reg_8bit reg_Acc_inst (.clk(clk), .rst(rst), .en(load | calc_en), .d(next_Acc), .q(Acc_reg));
 
-    // 4. REGISTRUL Q (Tine Deimpartitul la inceput, apoi se umple cu Catul)
+    // REGISTRUL Q (Tine Deimpartitul la inceput, apoi se umple cu Catul)
     mux_2to1_8bit mux_q_calc (.d0(Q_reg), .d1(q_step_res), .sel(calc_en), .y(q_calc_or_hold));
     mux_2to1_8bit mux_q_load (.d0(q_calc_or_hold), .d1(A), .sel(load), .y(next_Q));
     reg_8bit reg_Q_inst (.clk(clk), .rst(rst), .en(load | calc_en), .d(next_Q), .q(Q_reg));
@@ -122,7 +122,7 @@ module divider_seq (
     // Rezultatul final este Catul, care s-a format in Q
     assign result = Q_reg;
 
-    // 5. NUMARATORUL - Ne opreste dupa 8 pasi (pentru ca lucram pe 8 biti)
+    // NUMARATORUL - Ne opreste dupa 8 pasi (pentru ca lucram pe 8 biti)
     counter_4bit cnt_inst (.clk(clk), .rst(rst), .en(calc_en), .clr(load), .q(count));
 
     // Cand ajunge la 8 (in binar 1000), count_is_8 devine 1
