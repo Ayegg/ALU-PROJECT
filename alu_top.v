@@ -9,7 +9,7 @@ module alu_top (
     output Z, N, V       // Flag-urile de stare: Zero, Negativ, Overflow
 );
 
-    // FIRE DE LEGATURA (WIRES)
+    //WIRES
     // wire- transporta semnalul de la o iesire la o intrare
     wire [7:0] res_add, res_sub, res_mul, res_div, res_and, res_or, res_xor, res_shl, res_shr;
     wire cout_add, ovf_add, cout_sub, ovf_sub, mul_done, div_done;
