@@ -40,7 +40,7 @@ module multiplier_seq (
     reg_8bit reg_B (.clk(clk), .rst(rst), .en(load | shift), .d(next_B), .q(B_reg));
     assign b0_bit = B_reg[0]; // Semnalul care decide daca adunam in acest pas
 
-    // 3. SUMATORUL FIZIC
+    // SUMATORUL FIZIC
     // Aduna in mod constant valoarea actuala din A cu valoarea stocata in Acumulatorul P.
     add_sub_8bit adder_mult (
         .a(P_reg), .b(A_reg), 
