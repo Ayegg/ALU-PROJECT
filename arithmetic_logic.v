@@ -7,16 +7,15 @@ module add_sub_8bit(
     output [7:0] result,
     output cout, overflow
 );
-    wire [7:0] b_mod; // Fir intern pentru valoarea modificata a lui B
-    wire [8:0] c;     // Fire pentru bitii de transport (carry), de la 0 la 8
+    wire [7:0] b_mod; // Wire pentru valoarea modificata a lui B
+    wire [8:0] c;     // Wire pentru bitii de transport (carry), de la 0 la 8
     
-    // SECRETUL SCADERII IN HARDWARE (Complement fata de 2):
     // Pentru a face A - B, hardware-ul calculeaza de fapt A + (-B).
     // (-B) inseamna sa inversam toti bitii lui B si sa adunam 1.
     // Daca avem scadere (sub_mode = 1), carry-in initial (c[0]) primeste acel 1.
     assign c[0] = sub_mode; 
 
-    // Blocul GENERATE: Este echivalentul de la compilare al unui for-loop din C sau MATLAB.
+    // Blocul GENERATE
     // Nu ruleaza secvential, ci ii spune programului sa "printeze" fizic 8 sumatoare (full adders) pe placa.
     genvar i;
     generate
@@ -40,14 +39,14 @@ module add_sub_8bit(
     // Carry Out final este ultimul bit din sirul de transport
     assign cout = c[8];
     
-    // Overflow (Depasirea de capacitate pentru numere cu semn):
+    // Overflow:
     // Daca aduni doua numere pozitive si rezultatul e negativ (sau invers).
     // Se detecteaza mereu facand XOR intre ultimul si penultimul bit de transport.
     xor (overflow, c[8], c[7]); 
 endmodule
 
 
-// MODUL 2: OPERATII LOGICE PE BITS (Bitwise)
+// MODUL 2: OPERATII LOGICE
 
 module logic_ops_8bit(
     input [7:0] a, b,
@@ -66,14 +65,11 @@ module logic_ops_8bit(
 endmodule
 
 
-// MODUL 3: DEPLASARE (SHIFTARE) PE 8 BITI
+// MODUL 3:SHIFTARE PE 8 BITI
 module shifter_8bit(
     input [7:0] a,
     output [7:0] shift_left, shift_right
 );
-    // SHIFT IN HARDWARE = DOAR RECABLARE (Routing). Nu e nevoie de porti logice.
-    // Pur si simplu lipim firele altfel decat au intrat.
-
     // Shift Left (Inmultire cu 2): Deplasam totul la stanga.
     // Bitul cel mai nesemnificativ (pozitia 0) este fortat la 0.
     assign shift_left[0] = 1'b0;
