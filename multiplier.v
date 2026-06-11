@@ -7,7 +7,7 @@ module multiplier_seq (
     output [7:0] result,
     output reg done
 );
-    // --- SEMNALE DE CONTROL ---
+    // SEMNALE DE CONTROL
     // Aceste wires sunt 'comenzile' date de FSM catre Datapath
     wire load, shift, add;
     
