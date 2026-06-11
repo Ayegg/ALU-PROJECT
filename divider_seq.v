@@ -47,7 +47,7 @@ endmodule
 
 
 // 2. MODULUL PRINCIPAL: IMPARTITOR SECVENTIAL 
-// Implementeaza algoritmul de "Impartire cu Restaurare" (Restoring Division)
+// Implementeaza algoritmul Restoring Division
 module divider_seq (
     input clk, rst, start,
     input [7:0] A, B,     // A = Deimpartit, B = Impartitor
@@ -55,18 +55,18 @@ module divider_seq (
     output reg done       // Semnalul care anunta ca am terminat
 );
 
-    // Semnale generate de automatul de stari (FSM - creierul modulului)
+    // Semnale generate de automatul de stari (FSM)
     wire load;    // Incarca datele initiale
     wire calc_en; // Permite calculul efectiv
 
     // Registrii in care tinem datele pe parcursul celor 8 pasi
     wire [7:0] M_reg, Q_reg, Acc_reg;
     
-    // Fire care transporta datele catre registri pentru urmatorul ciclu de ceas
+    // Wires care transporta datele catre registri pentru urmatorul ciclu de ceas
     wire [7:0] next_M, next_Q, next_Acc;
     wire [7:0] acc_calc_or_hold, q_calc_or_hold;
     
-    // Semnale folosite in matematica impartirii
+    // Semnale folosite pentru impartire
     wire [7:0] acc_shifted;
     wire [7:0] q_shifted;
     wire [7:0] sub_res;
@@ -80,21 +80,17 @@ module divider_seq (
     wire b_is_zero;
     wire nc2, nc1, nc0;
 
-  
-    
-   
-
-    // 1. REGISTRUL M (Tine Impartitorul)
+    // REGISTRUL M (Tine Impartitorul)
     // Daca 'load' e 1, incarcam valoarea B. Altfel, isi pastreaza valoarea veche (M_reg).
     mux_2to1_8bit mux_m (.d0(M_reg), .d1(B), .sel(load), .y(next_M));
     reg_8bit reg_M_inst (.clk(clk), .rst(rst), .en(load), .d(next_M), .q(M_reg));
 
     // PRINCIPIUL IMPARTIRII: Shiftam Q (deimpartitul) in Acc (restul partial) bit cu bit.
-    // Shiftarea se face simplu, prin mutarea firelor la stanga.
+    // Shiftarea se face simplu, prin mutarea wires la stanga.
     assign acc_shifted = {Acc_reg[6:0], Q_reg[7]};
     assign q_shifted   = {Q_reg[6:0], 1'b0};
 
-    // 2. INCERCAM SA SCADEM IMPARTITORUL DIN RESTUL PARTIAL
+    // INCERCAM SA SCADEM IMPARTITORUL DIN RESTUL PARTIAL
     // Daca scaderea are succes (sub_cout == 1), inseamna ca incape.
     add_sub_8bit sub_div (
         .a(acc_shifted),
@@ -106,13 +102,13 @@ module divider_seq (
     );
 
     // Daca a incaput (sub_cout=1), pastram rezultatul scaderii in Acumulator.
-    // Daca nu a incaput (sub_cout=0), RESTAURAM valoarea de dinainte de scadere (acc_shifted).
+    // Daca nu a incaput (sub_cout=0), restauram valoarea de dinainte de scadere (acc_shifted).
     mux_2to1_8bit mux_acc_step (.d0(acc_shifted), .d1(sub_res), .sel(sub_cout), .y(acc_step_res));
     
     // Noul bit al catului este fix 'sub_cout' (1 daca a incaput, 0 daca nu). Il bagam in Q.
     assign q_step_res = {Q_reg[6:0], sub_cout};
 
-    // 3. REGISTRUL ACC (Restul)
+    // REGISTRUL ACC (Restul)
     mux_2to1_8bit mux_acc_calc (.d0(Acc_reg), .d1(acc_step_res), .sel(calc_en), .y(acc_calc_or_hold));
     mux_2to1_8bit mux_acc_load (.d0(acc_calc_or_hold), .d1(8'b0), .sel(load), .y(next_Acc));
     // Daca suntem in faza de incarcare SAU calcul, dam 'enable' la registru
@@ -123,7 +119,7 @@ module divider_seq (
     mux_2to1_8bit mux_q_load (.d0(q_calc_or_hold), .d1(A), .sel(load), .y(next_Q));
     reg_8bit reg_Q_inst (.clk(clk), .rst(rst), .en(load | calc_en), .d(next_Q), .q(Q_reg));
 
-    // Rezultatul final este Catul, care s-a format incetul cu incetul in Q
+    // Rezultatul final este Catul, care s-a format in Q
     assign result = Q_reg;
 
     // 5. NUMARATORUL - Ne opreste dupa 8 pasi (pentru ca lucram pe 8 biti)
@@ -141,8 +137,6 @@ module divider_seq (
 
    
     // FSM (AUTOMATUL DE STARI) 
-    // Este descris comportamental (cu mereu/if-else) pentru ca e mult mai clar
-    
     reg [1:0] state, next_state;
     // Cele 3 stari posibile: In repaus (IDLE), Calculeaza (CALC), Gata (DONE)
     localparam IDLE = 2'b00, CALC = 2'b01, DONE_ST = 2'b10;
